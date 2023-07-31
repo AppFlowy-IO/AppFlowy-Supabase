@@ -91,3 +91,20 @@ else
     echo -e "${RED}af_collab_statistics edit_count for oid($OID) is not 2: $AF_COLLAB_STATISTICS_EDIT_COUNT${NC}"
     exit 1
 fi
+
+# performing insert into af_collab_snapshot should use edit_count of af_collab_statistics
+echo -e "${BLUE}Inserting snapshot record into af_collab_snapshot${NC}"
+BLOB=blob1
+BLOB_SIZE=5
+$PSQL --command "\
+    INSERT INTO public.af_collab_snapshot (oid, blob, blob_size) \
+    VALUES ('$OID', '$BLOB', $BLOB_SIZE)"
+AF_COLLAB_SNAPSHOT_EDIT_COUNT=$($PSQL --tuples-only --command "\
+    SELECT edit_count FROM af_collab_snapshot WHERE oid = '$OID'")
+if [ $(trim "$AF_COLLAB_SNAPSHOT_EDIT_COUNT") == "2" ]
+then
+    echo -e "${GREEN}af_collab_snapshot edit_count for oid($OID): $AF_COLLAB_SNAPSHOT_EDIT_COUNT${NC}"
+else
+    echo -e "${RED}af_collab_snapshot edit_count for oid($OID) is not 2: $AF_COLLAB_SNAPSHOT_EDIT_COUNT${NC}"
+    exit 1
+fi
