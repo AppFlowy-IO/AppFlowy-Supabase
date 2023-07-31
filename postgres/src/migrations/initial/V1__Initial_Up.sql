@@ -293,17 +293,19 @@ CREATE TABLE IF NOT EXISTS af_collab_snapshot (
 );
 -- This trigger is fired after an insert operation on the af_collab_snapshot table. It automatically sets the edit_count
 -- of the new snapshot to the current edit_count of the collab in the af_collab_statistics table.
-CREATE OR REPLACE FUNCTION af_collab_snapshot_update_edit_count() RETURNS TRIGGER AS $$BEGIN NEW.edit_count := (
-      SELECT COALESCE(edit_count, 0)
-      FROM af_collab_statistics
-      WHERE oid = NEW.oid
-   );
-RETURN NEW;
+CREATE OR REPLACE FUNCTION af_collab_snapshot_update_edit_count() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.edit_count := (
+    SELECT af_collab_statistics.edit_count
+    FROM af_collab_statistics
+    WHERE af_collab_statistics.oid = NEW.oid
+  );
+  RETURN NEW;
 END;
 $$LANGUAGE plpgsql;
 CREATE TRIGGER af_collab_snapshot_update_edit_count_trigger
-AFTER
-INSERT ON af_collab_snapshot FOR EACH ROW EXECUTE FUNCTION af_collab_snapshot_update_edit_count();
+BEFORE INSERT ON af_collab_snapshot
+FOR EACH ROW EXECUTE FUNCTION af_collab_snapshot_update_edit_count();
 -- collab state view. It will be used to get the current state of the collab.
 CREATE VIEW af_collab_state AS
 SELECT a.oid,
