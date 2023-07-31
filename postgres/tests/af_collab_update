@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -e
+cd "$(dirname "$0")"
+source ./utils.sh
+echo -e "${BLUE}setting up af_collab_triggers test${NC}"
+
+# set up new user and workspace
+UUID=$(uuidgen)
+NAME="test_name_$(date +%s)"
+EMAIL="test_mail_$(date +%s)@test.com"
+$PSQL --command "\
+    INSERT INTO public.af_user (uuid, email, name) \
+    VALUES ('$UUID', '$EMAIL', '$NAME');"
+echo -e "${GREEN}af_user inserted${NC}"
+
+# get user uid
+USER_UID=$($PSQL --tuples-only --command "\
+    SELECT uid FROM af_user WHERE uuid = '$UUID'")
+echo -e "${GREEN}af_user uid: $USER_UID${NC}"
+
+# get workspace
+WORKSPACE_ID=$(trim $($PSQL --tuples-only --command "\
+    SELECT workspace_id \
+    FROM public.af_workspace \
+    WHERE owner_uid = $USER_UID"))
+if [ -z "$WORKSPACE_ID" ]; then
+    echo -e "${RED}workspace not associated with af_user of uuid: $UUID${NC}"
+    exit 1
+else
+    echo -e "${GREEN}workspace id associated with af_user(owner_uid): $WORKSPACE_ID${NC}"
+fi
+
+# set params
+OID=$(uuidgen)
+VALUE=value1
+VALUE_SIZE=6
+MD5=fake_md5
+PARTITION_KEY=1
+
+echo -e "${YELLOW}Params, oid: $OID, values: $VALUES, value_size: $VALUE_SIZE, md5: $MD5, partition_key: $PARTITION_KEY${NC}"
+
+# this insert should activate the trigger
+echo -e "${BLUE}Inserting into af_collab_update${NC}"
+$PSQL --command "\
+    INSERT INTO public.af_collab_update (oid, value, value_size, partition_key, uid, md5, workspace_id) \
+    VALUES ('$OID', '$VALUE', $VALUE_SIZE, $PARTITION_KEY, $USER_UID, '$MD5', '$WORKSPACE_ID')"
+echo -e "${GREEN}params inserted into af_collab_update${NC}"
+
+# check if af_collab was inserted by the trigger
+AF_COLLAB_OWNER_UID=$($PSQL --tuples-only --command "\
+    SELECT owner_uid FROM af_collab WHERE oid = '$OID'")
+if [ -z "$AF_COLLAB_OWNER_UID" ]; then
+    echo -e "${RED}no af_collab record found for OID: $OID${NC}"
+    exit 1
+else
+    echo -e "${GREEN}af_collab owner_uid for workspace_id($WORKSPACE_ID): $AF_COLLAB_OWNER_UID${NC}"
+fi
+
+# check if af_collab_member was inserted by the trigger
+AF_COLLAB_MEMBER_UID=$($PSQL --tuples-only --command "\
+    SELECT uid FROM af_collab_member WHERE oid = '$OID'")
+if [ -z "$AF_COLLAB_MEMBER_UID" ]; then
+    echo -e "${RED}no af_collab_member record found for OID: $OID${NC}"
+    exit 1
+else
+    echo -e "${GREEN}af_collab_memer uid for oid($OID): $AF_COLLAB_MEMBER_UID${NC}"
+fi
+
+# check if af_collab_statistics was inserted by the trigger
+AF_COLLAB_STATISTICS_EDIT_COUNT=$($PSQL --tuples-only --command "\
+    SELECT edit_count FROM af_collab_statistics WHERE oid = '$OID'")
+if [ -z "$AF_COLLAB_STATISTICS_EDIT_COUNT" ]; then
+    echo -e "${RED}no af_collab_statistics record found for OID: $OID${NC}"
+    exit 1
+else
+    echo -e "${GREEN}af_collab_statistics edit_count for oid($OID): $AF_COLLAB_STATISTICS_EDIT_COUNT${NC}"
+fi
+
