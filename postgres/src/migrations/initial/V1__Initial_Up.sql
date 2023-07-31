@@ -1,3 +1,5 @@
+-- Required by uuid_generate_v4()
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Insert default roles
 CREATE TABLE IF NOT EXISTS af_roles (
    id SERIAL PRIMARY KEY,
