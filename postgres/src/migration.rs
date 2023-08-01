@@ -1,7 +1,7 @@
 use refinery::embed_migrations;
 use tokio_postgres::Client;
 
-embed_migrations!("./src/migrations");
+embed_migrations!("./migrations");
 
 const AF_MIGRATION_HISTORY: &str = "af_migration_history";
 

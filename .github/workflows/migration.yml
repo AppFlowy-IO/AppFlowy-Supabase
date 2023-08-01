@@ -1,0 +1,59 @@
+name: Run Migration Tests
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install PostgresSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install postgresql-client
+
+      - name: Run all up migrations
+        working-directory: ./postgres/migrations
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: password
+          PGDB: postgres
+        run: |
+          for sql_script in ./*.up.sql
+          do
+              echo "Executing $sql_script"
+              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script
+              if [ $? -ne 0 ]
+              then
+                  echo "Migration $sql_script failed"
+                  exit 1
+              fi
+          done
+
+      - name: Run migration tests
+        working-directory: ./postgres/migrations_tests
+        run: |
+          ./check
+          ./af_user
+          ./af_collab_update
