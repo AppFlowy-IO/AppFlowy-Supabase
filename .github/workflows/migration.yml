@@ -40,7 +40,7 @@ jobs:
           PGPASSWORD: password
           PGDB: postgres
         run: |
-          for sql_script in ./*.up.sql
+          for sql_script in ./*_up.sql
           do
               echo "Executing $sql_script"
               psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script

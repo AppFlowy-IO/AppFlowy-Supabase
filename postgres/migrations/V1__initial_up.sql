@@ -297,10 +297,12 @@ CREATE TABLE IF NOT EXISTS af_collab_snapshot (
 -- of the new snapshot to the current edit_count of the collab in the af_collab_statistics table.
 CREATE OR REPLACE FUNCTION af_collab_snapshot_update_edit_count() RETURNS TRIGGER AS $$
 BEGIN
-  NEW.edit_count := (
-    SELECT af_collab_statistics.edit_count
+  NEW.edit_count := COALESCE(
+    (SELECT af_collab_statistics.edit_count
     FROM af_collab_statistics
-    WHERE af_collab_statistics.oid = NEW.oid
+    WHERE af_collab_statistics.oid = NEW.oid),
+    -- If the row in af_collab_statistics with given oid is found, set edit_count to 0
+    0
   );
   RETURN NEW;
 END;
