@@ -37,7 +37,7 @@ async fn main() {
 
 #[allow(dead_code)]
 async fn run_initial_drop(client: &Client) {
-    let sql = include_str!("../migrations/2023_01_01_0000.down.sql");
+    let sql = include_str!("../migrations/V1__initial.down.sql");
     client.batch_execute(sql).await.unwrap();
     client
         .batch_execute("DROP TABLE IF EXISTS af_migration_history")
