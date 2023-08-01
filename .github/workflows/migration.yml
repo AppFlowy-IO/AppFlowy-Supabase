@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  test:
+  migrations:
     runs-on: ubuntu-latest
     services:
       postgres:
