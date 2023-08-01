@@ -7,8 +7,8 @@ echo -e "${BLUE}Test af_user triggers${NC}"
 
 # set params
 UUID=$(uuidgen)
-NAME="test_name_$(date +%s)"
-EMAIL="test_mail_$(date +%s)@test.com"
+NAME="test_name_$(date +%N)"
+EMAIL="test_mail_$(date +%N)@test.com"
 echo -e "${YELLOW}UUID: $UUID, NAME: $NAME, EMAIL: $EMAIL${NC}"
 
 # test trigger workspace_table insertion when any record of af_user is inserted
