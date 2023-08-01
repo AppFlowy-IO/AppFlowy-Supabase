@@ -7,8 +7,8 @@ echo -e "${BLUE}setting up af_collab_triggers test${NC}"
 
 # set up new user and workspace
 UUID=$(uuidgen)
-NAME="test_name_$(date +%s)"
-EMAIL="test_mail_$(date +%s)@test.com"
+NAME="test_name_$(date +%N)"
+EMAIL="test_mail_$(date +%N)@test.com"
 $PSQL --command "\
     INSERT INTO public.af_user (uuid, email, name) \
     VALUES ('$UUID', '$EMAIL', '$NAME');"
