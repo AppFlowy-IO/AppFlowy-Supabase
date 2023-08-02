@@ -4,10 +4,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - postgres/migrations/**
+      - postgres/benches/**
 
   pull_request:
     branches:
       - main
+    paths:
+      - postgres/migrations/**
+      - postgres/benches/**
 
 env:
   PGHOST: localhost

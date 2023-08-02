@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - postgres/migrations/**
+      - postgres/benches/**
 
   pull_request:
     branches:
       - main
     paths:
       - postgres/migrations/**
+      - postgres/benches/**
 
 jobs:
   migrations:

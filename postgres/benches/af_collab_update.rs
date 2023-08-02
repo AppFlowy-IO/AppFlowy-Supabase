@@ -45,6 +45,7 @@ fn insert_row_benchmark(c: &mut Criterion) {
         uid,
         &target_workspace_id,
       ))
+      .unwrap();
     });
   });
   group.finish();

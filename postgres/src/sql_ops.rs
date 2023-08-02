@@ -5,7 +5,7 @@ pub async fn insert_into_af_collab_update(
   client: &mut Client,
   oid: &Uuid,
   value: &str,
-  partition_key: i16,
+  partition_key: i32,
   uid: i64,
   workspace_id: &Uuid,
 ) -> Result<u64, tokio_postgres::Error> {
@@ -22,9 +22,9 @@ pub async fn insert_into_af_collab_update(
     .execute(
       &statement,
       &[
-        &oid,
-        &value,
-        &(value.len() as i64),
+        &oid.to_string(),
+        &value.as_bytes(),
+        &(value.len() as i32),
         &partition_key,
         &uid,
         &md5,
