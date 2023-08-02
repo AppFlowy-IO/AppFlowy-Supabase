@@ -1,0 +1,51 @@
+name: Run Supabase Migration Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - postgres/migrations/**
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - postgres/migrations/**
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create .env file
+        run: |
+          touch .env.dev
+          echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env.dev
+          echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env.dev
+          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env.dev
+          echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env.dev
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            AppFlowy-Supabase/postgres
+          cache-all-crates: true
+
+      - name: Run all up migrations
+        run: |
+          cargo run database reset .env.dev
+
+      - name: Run migration tests
+        working-directory: ./postgres/migrations_tests
+        env:
+          PGHOST: ${{ secrets.SUPABASE_DB }}
+          PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+          PGUSER: ${{ secrets.SUPABASE_DB_USER }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGDB: postgres
+        run: |
+          ./check
+          ./af_user
+          ./af_collab_update
