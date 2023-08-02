@@ -1,49 +1,81 @@
-use crate::entities::PostgresConfiguration;
-use crate::migration::run_migrations;
-use tokio_postgres::{Client, NoTls};
-
 mod entities;
 mod migration;
 
+use crate::migration::{get_client, run_all_up_migrations, run_down_migration};
+use clap::{Arg, ArgAction, Command};
+
+/// Run migration with given name:
+///   cargo run migration run ".env.dev"
+/// Reset the database
+///   cargo run database reset ".env.dev"
 #[tokio::main]
-async fn main() {
-  // 1. The .env.dev is used by developers for their work, including building new features and fixing bugs
-  // 2. The .env.stage is a replica of the production environment used for testing. It's where you deploy
-  // and test changes before they go live in production.
-  // 3. The .env.prod is the production environment.
-  if dotenv::from_filename(".env.dev").is_err() {
-    return;
-  }
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  let app = Command::new("supabase")
+    .about("Tool for manager supabase")
+    .subcommand(
+      Command::new("database").subcommand(
+        Command::new("reset").about("Reset the database").arg(
+          Arg::new("env")
+            .action(ArgAction::Set)
+            .value_name("ENV File Name")
+            .required(true),
+        ),
+      ),
+    )
+    .subcommand(
+      Command::new("migration").subcommand(
+        Command::new("run")
+          .about("Run migration with given name")
+          .arg(
+            Arg::new("env")
+              .action(ArgAction::Set)
+              .value_name("ENV File Name")
+              .required(true),
+          ),
+      ),
+    );
 
-  let configuration = PostgresConfiguration::from_env().unwrap();
-  let mut config = tokio_postgres::Config::new();
-  config
-    .host(&configuration.url)
-    .user(&configuration.user_name)
-    .password(&configuration.password)
-    .port(configuration.port);
+  let matches = app.get_matches();
 
-  // Using the https://docs.rs/postgres-openssl/latest/postgres_openssl/ to enable tls connection.
-  if let Ok((mut client, connection)) = config.connect(NoTls).await {
-    tokio::spawn(async move {
-      if let Err(e) = connection.await {
-        eprintln!("postgres db connection error: {}", e);
-      }
-    });
-
-    match run_migrations(&mut client).await {
-      Ok(_) => println!("migrations success"),
-      Err(e) => println!("migrations error: {}", e),
+  // Match on the provided command and perform appropriate actions
+  if let Some(subcommand) = matches.subcommand() {
+    match subcommand {
+      ("database", supabase_matches) => {
+        if let Some(subcommand) = supabase_matches.subcommand() {
+          match subcommand {
+            ("reset", migration_matches) => {
+              let env_file_name = migration_matches
+                .try_get_one::<String>("env")
+                .expect("Missing migration env")
+                .unwrap();
+              println!("Reset databases from env: {:?}", env_file_name);
+              let mut client = get_client(env_file_name).await?;
+              run_down_migration(&client).await?;
+              run_all_up_migrations(&mut client).await?;
+            },
+            _ => (),
+          }
+        }
+      },
+      ("migration", supabase_matches) => {
+        if let Some(subcommand) = supabase_matches.subcommand() {
+          match subcommand {
+            ("run", migration_matches) => {
+              let env_file_name = migration_matches
+                .try_get_one::<String>("env")
+                .expect("Missing migration env")
+                .unwrap();
+              println!("Running migration from env: {:?}", env_file_name);
+              let mut client = get_client(env_file_name).await?;
+              run_all_up_migrations(&mut client).await?;
+            },
+            _ => (),
+          }
+        }
+      },
+      _ => (),
     }
   }
-}
 
-#[allow(dead_code)]
-async fn run_initial_drop(client: &Client) {
-  let sql = include_str!("../migrations/V1__initial.down.sql");
-  client.batch_execute(sql).await.unwrap();
-  client
-    .batch_execute("DROP TABLE IF EXISTS af_migration_history")
-    .await
-    .unwrap();
+  Ok(())
 }
