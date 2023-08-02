@@ -38,6 +38,26 @@ async fn main() {
   }
 }
 
+pub async fn connect_to_dev_postgres() -> Result<
+  (
+    Client,
+    tokio_postgres::Connection<tokio_postgres::Socket, tokio_postgres::tls::NoTlsStream>,
+  ),
+  tokio_postgres::Error,
+> {
+  if dotenv::from_filename(".env.dev").is_err() {
+    tracing::warn!("no .env.dev file found");
+  }
+  let configuration = PostgresConfiguration::from_env().unwrap();
+  let mut config = tokio_postgres::Config::new();
+  config
+    .host(&configuration.url)
+    .user(&configuration.user_name)
+    .password(&configuration.password)
+    .port(configuration.port);
+  config.connect(NoTls).await
+}
+
 #[allow(dead_code)]
 async fn run_initial_drop(client: &Client) {
   let sql = include_str!("../migrations/V1__initial.down.sql");

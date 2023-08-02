@@ -13,9 +13,14 @@ futures = "0.3.26"
 dotenv = "0.15.0"
 tokio = { version = "1.26", features = ["sync"]}
 anyhow = "1.0.72"
+tracing = "0.1.37"
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion = { version="0.5.1", features = ["async_futures"] }
+
+[lib]
+name = "postgres"
+path = "src/main.rs"
 
 [[bench]]
 name = "af_collab_update"
