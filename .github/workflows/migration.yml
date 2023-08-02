@@ -40,7 +40,6 @@ jobs:
 
       - name: Run all up migrations
         working-directory: ./postgres/migrations
-        env:
         run: |
           for sql_script in ./*_up.sql
           do
@@ -60,13 +59,11 @@ jobs:
           ./af_user
           ./af_collab_update
 
-      - name: Install Rust toolchain
-        id: rust_toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: Swatinem/rust-cache@v2
         with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          override: true
-          profile: minimal
+          workspaces: |
+            AppFlowy-Supabase/postgres
+          cache-all-crates: true
 
       - name: Run benchmark (insert into af_collab_update)
         working-directory: ./postgres
