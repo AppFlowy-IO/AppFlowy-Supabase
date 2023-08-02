@@ -24,10 +24,22 @@ jobs:
           touch .env.dev
           echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env.dev
           echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env.dev
-          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env.dev
+          echo SUPABASE_DB_PORT=${{ vars.ENV_CONTEXT_VAR }} >> .env.dev
           echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env.dev
+          cat .env.dev
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            AppFlowy-Supabase/postgres
+          cache-all-crates: true
 
       - name: Run all up migrations
+        env:
+          SUPABASE_DB: ${{ secrets.SUPABASE_DB }}
+          SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+          SUPABASE_DB_PORT: ${{ vars.ENV_CONTEXT_VAR }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           cargo run database reset .env.dev
 
@@ -35,7 +47,7 @@ jobs:
         working-directory: ./postgres/migrations_tests
         env:
           PGHOST: ${{ secrets.SUPABASE_DB }}
-          PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+          PGPORT: ${{ vars.ENV_CONTEXT_VAR }}
           PGUSER: ${{ secrets.SUPABASE_DB_USER }}
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           PGDB: postgres
