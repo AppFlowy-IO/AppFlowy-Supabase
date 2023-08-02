@@ -49,3 +49,12 @@ jobs:
           ./check
           ./af_user
           ./af_collab_update
+
+      - name: Run benchmark (insert into af_collab_update)
+        working-directory: ./postgres
+        env:
+          PGHOST: ${{ secrets.SUPABASE_DB }}
+          PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+          PGUSER: ${{ secrets.SUPABASE_DB_USER }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: cargo bench
