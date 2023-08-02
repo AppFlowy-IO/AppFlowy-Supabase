@@ -6,6 +6,7 @@ use postgres::{
     select_workspace_ids_from_af_workspace_for_owner,
   },
 };
+use rand::Rng;
 use uuid::Uuid;
 
 fn insert_row_benchmark(c: &mut Criterion) {
@@ -33,6 +34,7 @@ fn insert_row_benchmark(c: &mut Criterion) {
   }
   let target_workspace_id = workspace_ids[0];
   let target_partition_key = 1;
+  let target_value = generate_random_str(200);
 
   let mut group = c.benchmark_group("insert_row");
   group.bench_function("insert_row", |b| {
@@ -40,7 +42,7 @@ fn insert_row_benchmark(c: &mut Criterion) {
       rt.block_on(insert_into_af_collab_update(
         &mut client,
         &Uuid::new_v4(),
-        &"value1",
+        &target_value,
         target_partition_key,
         uid,
         &target_workspace_id,
@@ -49,6 +51,19 @@ fn insert_row_benchmark(c: &mut Criterion) {
     });
   });
   group.finish();
+}
+
+fn generate_random_str(length: usize) -> String {
+  const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let mut rng = rand::thread_rng();
+  let random_str: String = (0..length)
+    .map(|_| {
+      let index = rng.gen::<usize>() % CHARSET.len();
+      CHARSET[index] as char
+    })
+    .collect();
+
+  random_str
 }
 
 criterion_group!(benches, insert_row_benchmark);

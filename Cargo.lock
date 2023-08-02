@@ -113,6 +113,7 @@ dependencies = [
  "dotenv",
  "futures",
  "md5",
+ "rand",
  "refinery",
  "tokio",
  "tokio-postgres",
