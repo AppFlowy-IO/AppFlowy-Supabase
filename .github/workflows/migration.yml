@@ -1,4 +1,4 @@
-name: Run Migration Tests
+name: Run Migration Tests and Benchmarks
 
 on:
   push:
@@ -8,6 +8,13 @@ on:
   pull_request:
     branches:
       - main
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: postgres
+  PGPASSWORD: password
+  PGDB: postgres
 
 jobs:
   migrations:
@@ -34,11 +41,6 @@ jobs:
       - name: Run all up migrations
         working-directory: ./postgres/migrations
         env:
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: password
-          PGDB: postgres
         run: |
           for sql_script in ./*_up.sql
           do
@@ -53,13 +55,19 @@ jobs:
 
       - name: Run migration tests
         working-directory: ./postgres/migrations_tests
-        env:
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: password
-          PGDB: postgres
         run: |
           ./check
           ./af_user
           ./af_collab_update
+
+      - name: Install Rust toolchain
+        id: rust_toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          override: true
+          profile: minimal
+
+      - name: Run benchmark (insert into af_collab_update)
+        working-directory: ./postgres
+        run: cargo bench

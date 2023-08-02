@@ -61,7 +61,11 @@ pub async fn connect_to_dev_postgres() -> Result<Client, tokio_postgres::Error> 
 
       Ok(client)
     },
-    Err(e) => panic!("postgres db connection error: {}", e),
+    Err(e) => {
+      // print config details
+      println!("config: {:?}", config);
+      panic!("postgres db connection error: {}", e)
+    },
   }
 }
 
