@@ -1,8 +1,11 @@
 mod entities;
 mod migration;
+pub mod sql_ops;
 
 use crate::migration::{get_client, run_all_up_migrations, run_down_migration};
 use clap::{Arg, ArgAction, Command};
+use entities::PostgresConfiguration;
+use tokio_postgres::{Client, NoTls};
 
 /// Run migration with given name:
 ///   cargo run migration run ".env.dev"
@@ -78,4 +81,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   }
 
   Ok(())
+}
+
+pub async fn connect_to_dev_postgres() -> Result<Client, tokio_postgres::Error> {
+  if dotenv::from_filename(".env.dev").is_err() {
+    tracing::warn!("no .env.dev file found");
+  }
+  let configuration = PostgresConfiguration::from_env().unwrap();
+  let mut config = tokio_postgres::Config::new();
+  config
+    .host(&configuration.url)
+    .user(&configuration.user_name)
+    .password(&configuration.password)
+    .port(configuration.port);
+
+  match config.connect(NoTls).await {
+    Ok((client, connection)) => {
+      tokio::spawn(async move {
+        if let Err(e) = connection.await {
+          panic!("postgres db connection error: {}", e);
+        }
+      });
+
+      Ok(client)
+    },
+    Err(e) => {
+      // print config details
+      println!("config: {:?}", config);
+      panic!("postgres db connection error: {}", e)
+    },
+  }
 }

@@ -1,13 +1,26 @@
-name: Run Migration Tests
+name: Run Migration Tests and Benchmarks
 
 on:
   push:
     branches:
       - main
+    paths:
+      - postgres/migrations/**
+      - postgres/benches/**
 
   pull_request:
     branches:
       - main
+    paths:
+      - postgres/migrations/**
+      - postgres/benches/**
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: postgres
+  PGPASSWORD: password
+  PGDB: postgres
 
 jobs:
   migrations:
@@ -33,12 +46,6 @@ jobs:
 
       - name: Run all up migrations
         working-directory: ./postgres/migrations
-        env:
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: password
-          PGDB: postgres
         run: |
           for sql_script in ./*_up.sql
           do
@@ -53,13 +60,17 @@ jobs:
 
       - name: Run migration tests
         working-directory: ./postgres/migrations_tests
-        env:
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: password
-          PGDB: postgres
         run: |
           ./check
           ./af_user
           ./af_collab_update
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            AppFlowy-Supabase/postgres
+          cache-all-crates: true
+
+      - name: Run benchmark (insert into af_collab_update)
+        working-directory: ./postgres
+        run: cargo bench
