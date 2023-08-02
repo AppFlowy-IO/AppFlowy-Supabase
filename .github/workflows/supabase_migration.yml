@@ -22,10 +22,10 @@ jobs:
       - name: Create .env file
         run: |
           touch .env.dev
-          echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env
-          echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env
-          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env
-          echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env
+          echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env.dev
+          echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env.dev
+          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env.dev
+          echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env.dev
 
       - name: Run all up migrations
         run: |
