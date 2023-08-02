@@ -4,6 +4,7 @@ use tokio_postgres::{Client, NoTls};
 
 mod entities;
 mod migration;
+pub mod sql_ops;
 
 #[tokio::main]
 async fn main() {
@@ -38,13 +39,7 @@ async fn main() {
   }
 }
 
-pub async fn connect_to_dev_postgres() -> Result<
-  (
-    Client,
-    tokio_postgres::Connection<tokio_postgres::Socket, tokio_postgres::tls::NoTlsStream>,
-  ),
-  tokio_postgres::Error,
-> {
+pub async fn connect_to_dev_postgres() -> Result<Client, tokio_postgres::Error> {
   if dotenv::from_filename(".env.dev").is_err() {
     tracing::warn!("no .env.dev file found");
   }
@@ -55,7 +50,19 @@ pub async fn connect_to_dev_postgres() -> Result<
     .user(&configuration.user_name)
     .password(&configuration.password)
     .port(configuration.port);
-  config.connect(NoTls).await
+
+  match config.connect(NoTls).await {
+    Ok((client, connection)) => {
+      tokio::spawn(async move {
+        if let Err(e) = connection.await {
+          panic!("postgres db connection error: {}", e);
+        }
+      });
+
+      Ok(client)
+    },
+    Err(e) => panic!("postgres db connection error: {}", e),
+  }
 }
 
 #[allow(dead_code)]
