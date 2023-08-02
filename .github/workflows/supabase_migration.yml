@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - main
-#    paths:
-#      - postgres/migrations/**
+    paths:
+      - postgres/migrations/**
 
   pull_request:
     branches:
       - main
-#    paths:
-#      - postgres/migrations/**
+    paths:
+      - postgres/migrations/**
 
 jobs:
   migrations:
