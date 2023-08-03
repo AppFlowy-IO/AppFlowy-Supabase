@@ -68,12 +68,18 @@ fn insert_delete_row_benchmark(c: &mut Criterion) {
     let mut rng = thread_rng();
     keys.shuffle(&mut rng);
     let mut delete_group = c.benchmark_group("delete_row_group");
-    delete_group.sample_size(keys.len());
+
+    // configured to delete all rows
+    // unable to totally remove warm up time
+    // it will run at least once
+    delete_group.warm_up_time(std::time::Duration::from_nanos(1));
+    delete_group.sample_size(keys.len() - 1);
+
     delete_group.bench_function("delete_row", |b| {
       b.iter(|| {
         let key = match keys.pop() {
           Some(k) => k,
-          None => return, // No more keys to delete
+          None => panic!("No keys left"),
         };
         rt.block_on(delete_from_af_collab_update(
           &mut client,
