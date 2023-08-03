@@ -34,6 +34,46 @@ pub async fn insert_into_af_collab_update(
     .await
 }
 
+pub async fn select_keys_from_af_collab_update(
+  client: &mut Client,
+  oid: &Uuid,
+  partition_key: i32,
+  workspace_id: &Uuid,
+) -> Result<Vec<i64>, tokio_postgres::Error> {
+  client
+    .query(
+      "
+        SELECT key
+        FROM af_collab_update
+        WHERE oid = $1 AND partition_key = $2 AND workspace_id = $3
+        ",
+      &[&oid.to_string(), &partition_key, &workspace_id],
+    )
+    .await
+    .map(|rows| rows.iter().map(|row| row.get(0)).collect())
+}
+
+pub async fn delete_from_af_collab_update(
+  client: &mut Client,
+  oid: &Uuid,
+  key: i64,
+  partition_key: i32,
+  workspace_id: &Uuid,
+) -> Result<u64, tokio_postgres::Error> {
+  client
+    .execute(
+      "
+        DELETE FROM af_collab_update
+        WHERE oid = $1
+            AND key = $2
+            AND partition_key = $3
+            AND workspace_id = $4
+        ",
+      &[&oid.to_string(), &key, &partition_key, &workspace_id],
+    )
+    .await
+}
+
 pub async fn insert_into_af_user(
   client: &mut Client,
   uuid: &Uuid,

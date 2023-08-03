@@ -2,14 +2,15 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use postgres::{
   self,
   sql_ops::{
-    insert_into_af_collab_update, insert_into_af_user,
-    select_workspace_ids_from_af_workspace_for_owner,
+    delete_from_af_collab_update, insert_into_af_collab_update, insert_into_af_user,
+    select_keys_from_af_collab_update, select_workspace_ids_from_af_workspace_for_owner,
   },
 };
-use rand::Rng;
+use rand::thread_rng;
+use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 
-fn insert_row_benchmark(c: &mut Criterion) {
+fn insert_delete_row_benchmark(c: &mut Criterion) {
   let rt = tokio::runtime::Runtime::new().unwrap();
   let mut client = rt.block_on(postgres::connect_to_dev_postgres()).unwrap();
 
@@ -35,22 +36,63 @@ fn insert_row_benchmark(c: &mut Criterion) {
   let target_workspace_id = workspace_ids[0];
   let target_partition_key = 1;
   let target_value = generate_random_str(200);
+  let target_oid = Uuid::new_v4();
 
-  let mut group = c.benchmark_group("insert_row");
-  group.bench_function("insert_row", |b| {
-    b.iter(|| {
-      rt.block_on(insert_into_af_collab_update(
+  {
+    let mut insert_group = c.benchmark_group("insert_row_group");
+    insert_group.bench_function("insert_row_function", |b| {
+      b.iter(|| {
+        rt.block_on(insert_into_af_collab_update(
+          &mut client,
+          &target_oid,
+          &target_value,
+          target_partition_key,
+          uid,
+          &target_workspace_id,
+        ))
+        .unwrap();
+      });
+    });
+    insert_group.finish();
+  }
+
+  {
+    let mut keys = rt
+      .block_on(select_keys_from_af_collab_update(
         &mut client,
-        &Uuid::new_v4(),
-        &target_value,
+        &target_oid,
         target_partition_key,
-        uid,
         &target_workspace_id,
       ))
       .unwrap();
+    let mut rng = thread_rng();
+    keys.shuffle(&mut rng);
+    let mut delete_group = c.benchmark_group("delete_row_group");
+
+    // configured to delete all rows
+    // unable to totally remove warm up time
+    // it will run at least once
+    delete_group.warm_up_time(std::time::Duration::from_nanos(1));
+    delete_group.sample_size(keys.len() - 1);
+
+    delete_group.bench_function("delete_row", |b| {
+      b.iter(|| {
+        let key = match keys.pop() {
+          Some(k) => k,
+          None => panic!("No keys left"),
+        };
+        rt.block_on(delete_from_af_collab_update(
+          &mut client,
+          &target_oid,
+          key,
+          target_partition_key,
+          &target_workspace_id,
+        ))
+        .unwrap();
+      })
     });
-  });
-  group.finish();
+    delete_group.finish();
+  }
 }
 
 fn generate_random_str(length: usize) -> String {
@@ -66,5 +108,5 @@ fn generate_random_str(length: usize) -> String {
   random_str
 }
 
-criterion_group!(benches, insert_row_benchmark);
+criterion_group!(benches, insert_delete_row_benchmark);
 criterion_main!(benches);
