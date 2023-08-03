@@ -35,13 +35,14 @@ fn insert_row_benchmark(c: &mut Criterion) {
   let target_workspace_id = workspace_ids[0];
   let target_partition_key = 1;
   let target_value = generate_random_str(200);
+  let target_oid = Uuid::new_v4();
 
   let mut group = c.benchmark_group("insert_row");
   group.bench_function("insert_row", |b| {
     b.iter(|| {
       rt.block_on(insert_into_af_collab_update(
         &mut client,
-        &Uuid::new_v4(),
+        &target_oid,
         &target_value,
         target_partition_key,
         uid,
