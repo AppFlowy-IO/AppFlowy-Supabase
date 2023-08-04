@@ -1,54 +1,40 @@
-DROP TABLE IF EXISTS af_user CASCADE;
-DROP TABLE IF EXISTS af_workspace CASCADE;
-DROP TABLE IF EXISTS af_user_workspace CASCADE;
-DROP TABLE IF EXISTS af_collab CASCADE;
-DROP TABLE IF EXISTS af_collab_update CASCADE;
-DROP VIEW IF EXISTS af_collab_state CASCADE;
-DROP TABLE IF EXISTS af_collab_snapshot CASCADE;
-DROP TABLE IF EXISTS af_collab_statistics CASCADE;
-DROP TABLE IF EXISTS af_roles CASCADE;
-DROP TABLE IF EXISTS af_permissions CASCADE;
-DROP TABLE IF EXISTS af_role_permissions CASCADE;
-DROP TABLE IF EXISTS af_collab_member CASCADE;
-DROP TABLE IF EXISTS af_workspace_member CASCADE;
-DROP VIEW IF EXISTS af_user_profile_view CASCADE;
-
-DROP TRIGGER IF EXISTS create_af_workspace_trigger ON af_workspace CASCADE;
-DROP FUNCTION IF EXISTS create_af_workspace_func;
-
-DROP TRIGGER IF EXISTS create_af_user_workspace_trigger ON af_workspace CASCADE;
-DROP FUNCTION IF EXISTS create_af_user_workspace_trigger_func;
-
-DROP TRIGGER IF EXISTS af_collab_update_insert_trigger ON af_collab_update CASCADE;
-DROP FUNCTION IF EXISTS increment_af_collab_update_count;
-
+DROP FUNCTION IF EXISTS public.flush_collab_updates;
+DROP FUNCTION IF EXISTS af_shared_collab_for_uid;
+DROP FUNCTION IF EXISTS insert_af_workspace_member_if_owner;
+DROP VIEW IF EXISTS af_collab_state;
 DROP TRIGGER IF EXISTS af_collab_snapshot_update_edit_count_trigger ON af_collab_snapshot;
 DROP FUNCTION IF EXISTS af_collab_snapshot_update_edit_count;
-
-DROP TRIGGER IF EXISTS check_and_delete_snapshots_trigger ON af_collab_snapshot CASCADE;
-DROP FUNCTION IF EXISTS check_and_delete_snapshots;
-
-DROP TRIGGER IF EXISTS new_af_collab_update_row_trigger ON af_collab_update CASCADE;
-DROP FUNCTION IF EXISTS notify_on_insert_af_collab_update;
-
-DROP TRIGGER IF EXISTS insert_into_af_collab_trigger ON af_collab_update CASCADE;
-DROP FUNCTION IF EXISTS insert_into_af_collab_if_not_exists;
-
-DROP TRIGGER IF EXISTS insert_into_af_collab_member_trigger ON af_collab CASCADE;
-DROP FUNCTION IF EXISTS insert_into_af_collab_member;
-
-DROP TRIGGER IF EXISTS af_collab_update_edit_count_trigger ON af_collab_update CASCADE;
+DROP TABLE IF EXISTS af_collab_snapshot;
+DROP TRIGGER IF EXISTS af_collab_update_edit_count_trigger ON af_collab_update;
 DROP FUNCTION IF EXISTS increment_af_collab_edit_count;
-
-DROP TRIGGER IF EXISTS manage_af_workspace_member_role_trigger ON af_workspace CASCADE;
-DROP FUNCTION IF EXISTS manage_af_workspace_member_role_func;
-
-DROP TRIGGER IF EXISTS update_af_workspace_member_updated_at_trigger ON af_collab_update CASCADE;
+DROP TABLE IF EXISTS af_collab_statistics;
+DROP TRIGGER IF EXISTS insert_into_af_collab_member_trigger ON af_collab;
+DROP FUNCTION IF EXISTS insert_into_af_collab_member;
+DROP TABLE IF EXISTS af_collab_member;
+DROP TRIGGER IF EXISTS insert_into_af_collab_trigger ON af_collab_update;
+DROP FUNCTION IF EXISTS insert_into_af_collab_if_not_exists;
+DROP TRIGGER IF EXISTS update_af_workspace_member_updated_at_trigger ON af_collab_update_folder;
 DROP FUNCTION IF EXISTS update_af_workspace_member_updated_at_func;
-
-DROP TRIGGER IF EXISTS update_af_user_modtime ON af_user CASCADE;
+DROP TABLE IF EXISTS af_collab_update_database_row;
+DROP TABLE IF EXISTS af_collab_update_folder;
+DROP TABLE IF EXISTS af_collab_update_w_database;
+DROP TABLE IF EXISTS af_collab_update_database;
+DROP TABLE IF EXISTS af_collab_update_document;
+DROP TABLE IF EXISTS af_collab_update;
+DROP INDEX IF EXISTS idx_af_collab_oid;
+DROP TABLE IF EXISTS af_collab;
+DROP VIEW IF EXISTS af_user_profile_view;
+DROP TRIGGER IF EXISTS manage_af_workspace_member_role_trigger ON af_workspace;
+DROP FUNCTION IF EXISTS manage_af_workspace_member_role_func;
+DROP INDEX IF EXISTS idx_af_workspace_member;
+DROP TABLE IF EXISTS af_workspace_member;
+DROP TRIGGER IF EXISTS create_af_workspace_trigger ON af_user;
+DROP FUNCTION IF EXISTS create_af_workspace_func;
+DROP TABLE IF EXISTS af_workspace;
+DROP TRIGGER IF EXISTS update_af_user_modtime ON af_user;
 DROP FUNCTION IF EXISTS update_updated_at_column_func;
-
-DROP FUNCTION IF EXISTS insert_af_workspace_member_if_owner;
-DROP FUNCTION IF EXISTS af_shared_collab_for_uid;
-DROP FUNCTION IF EXISTS flush_collab_updates;
+DROP TABLE IF EXISTS af_user;
+DROP TABLE IF EXISTS af_role_permissions;
+DROP TABLE IF EXISTS af_permissions;
+DROP TABLE IF EXISTS af_roles;
+DROP EXTENSION IF EXISTS "uuid-ossp";
