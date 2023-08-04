@@ -26,7 +26,7 @@ pub async fn run_all_up_migrations(client: &mut Client) -> Result<(), anyhow::Er
 
 pub async fn run_down_migration(client: &Client) -> Result<(), Error> {
   let sql = include_str!("../migrations/V1__initial.down.sql");
-  client.batch_execute(sql).await.unwrap();
+  client.batch_execute(sql).await?;
   client
     .batch_execute("DROP TABLE IF EXISTS af_migration_history")
     .await?;

@@ -47,7 +47,7 @@ jobs:
       - name: Run all up migrations
         working-directory: ./postgres/migrations
         run: |
-          for sql_script in ./*_up.sql
+          for sql_script in $(ls | grep _up.sql | sort)
           do
               echo "Executing $sql_script"
               psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script
@@ -74,3 +74,23 @@ jobs:
       - name: Run benchmark (insert into af_collab_update)
         working-directory: ./postgres
         run: cargo bench
+
+      - name: Run all down migrations
+        working-directory: ./postgres/migrations
+        run: |
+          for sql_script in $(ls | grep .down.sql | sort -r)
+          do
+              echo "Executing $sql_script"
+              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script
+              if [ $? -ne 0 ]
+              then
+                  echo "Migration $sql_script failed"
+                  exit 1
+              fi
+          done
+          # should not have any relations after down
+          ITEMS=$(psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --command "\d")
+          if [[ "$ITEMS" ]]; then
+              echo "There are still items after executing all down scripts"
+              exit 1
+          fi
