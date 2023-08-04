@@ -37,4 +37,3 @@ DROP TABLE IF EXISTS af_user;
 DROP TABLE IF EXISTS af_role_permissions;
 DROP TABLE IF EXISTS af_permissions;
 DROP TABLE IF EXISTS af_roles;
-DROP EXTENSION IF EXISTS "uuid-ossp";
