@@ -15,9 +15,15 @@ pub async fn run_all_up_migrations(client: &mut Client) -> Result<(), anyhow::Er
   {
     Ok(report) => {
       if !report.applied_migrations().is_empty() {
-        println!("✅Run postgres db migration: {:?}", report);
+        println!(
+          "✅ Run {} postgres db migration",
+          report.applied_migrations().len()
+        );
+        for migration in report.applied_migrations() {
+          println!("✅ Applied migration: {}", migration.name());
+        }
       }
-      println!("✅Run migration successfully");
+      println!("✅ Run migration successfully");
       Ok(())
     },
     Err(e) => Err(anyhow::anyhow!("❌Run migration failed with error: {}", e)),
