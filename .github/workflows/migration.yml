@@ -37,7 +37,7 @@ jobs:
       - name: Start postgres
         working-directory: ./postgres/migrations
         run: |
-          docker build -t appflowy-postgres .
+          docker build -t appflowy_postgres .
           docker run -e POSTGRES_PASSWORD=password -p 5432:5432 -d appflowy_postgres
           sleep 10 # wait for ready
 
