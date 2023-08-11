@@ -2,19 +2,6 @@ name: Run Supabase Migration Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - postgres/migrations/**
-      - postgres/benches/**
-
-  pull_request:
-    branches:
-      - main
-    paths:
-      - postgres/migrations/**
-      - postgres/benches/**
 
 jobs:
   migrations:

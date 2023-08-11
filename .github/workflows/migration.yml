@@ -32,7 +32,7 @@ jobs:
       - name: Install Packages
         run: |
           sudo apt-get update
-          sudo apt-get -y install postgresql-client docker.io
+          sudo apt-get -y install postgresql-client docker
 
       - name: Start postgres
         working-directory: ./postgres/migrations
