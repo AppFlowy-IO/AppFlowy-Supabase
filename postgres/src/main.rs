@@ -13,6 +13,8 @@ use tokio_postgres::{Client, NoTls};
 ///   cargo run database reset ".env.dev"
 #[tokio::main]
 #[allow(dead_code)]
+#[allow(clippy::collapsible_match)]
+#[allow(clippy::single_match)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let app = Command::new("supabase")
     .about("Tool for manager supabase")
