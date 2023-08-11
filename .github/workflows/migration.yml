@@ -50,7 +50,7 @@ jobs:
           for sql_script in $(ls | grep _up.sql | sort)
           do
               echo "Executing $sql_script"
-              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script
+              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script --variable ON_ERROR_STOP=on
               if [ $? -ne 0 ]
               then
                   echo "Migration $sql_script failed"
@@ -81,7 +81,7 @@ jobs:
           for sql_script in $(ls | grep .down.sql | sort -r)
           do
               echo "Executing $sql_script"
-              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script
+              psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB --file=$sql_script --variable ON_ERROR_STOP=on
               if [ $? -ne 0 ]
               then
                   echo "Migration $sql_script failed"
