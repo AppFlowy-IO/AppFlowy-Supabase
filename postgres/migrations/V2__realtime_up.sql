@@ -1,3 +1,6 @@
+CREATE ROLE anon;
+CREATE ROLE authenticated;
+
 -- Add the did(device_id) column to the af_collab_update table
 ALTER TABLE af_collab_update ADD COLUMN did TEXT DEFAULT '';
 -- Enable RLS on the af_collab_update table
