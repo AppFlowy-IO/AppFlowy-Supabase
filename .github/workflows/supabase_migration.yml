@@ -2,6 +2,9 @@ name: Run Supabase Migration Test
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        required: true
 
 jobs:
   migrations:
