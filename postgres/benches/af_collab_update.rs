@@ -30,7 +30,7 @@ fn insert_delete_row_benchmark(c: &mut Criterion) {
       uid,
     ))
     .unwrap();
-  if workspace_ids.len() == 0 {
+  if workspace_ids.is_empty() {
     panic!("No workspace ids found for user {}", uid);
   }
   let target_workspace_id = workspace_ids[0];
