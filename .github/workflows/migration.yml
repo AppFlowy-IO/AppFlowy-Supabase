@@ -25,24 +25,21 @@ env:
 jobs:
   migrations:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install PostgresSQL client
+      - name: Install Packages
         run: |
           sudo apt-get update
-          sudo apt-get -y install postgresql-client
+          sudo apt-get -y install postgresql-client docker.io
+
+      - name: Start postgres
+        working-directory: ./postgres/migrations
+        run: |
+          docker build -t appflowy-postgres .
+          docker run -e POSTGRES_PASSWORD=password -p 5432:5432 -d appflowy_postgres
+          sleep 10 # wait for ready
 
       - name: Run all up migrations
         working-directory: ./postgres/migrations
