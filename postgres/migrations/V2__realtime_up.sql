@@ -9,27 +9,47 @@ TO anon, authenticated
 USING (true);
 
 -- Enable RLS on the af_user table
+-- Policy for INSERT
 ALTER TABLE af_user ENABLE ROW LEVEL SECURITY;
 CREATE POLICY af_user_insert_policy
 ON public.af_user
 FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
-
+-- Policy for UPDATE
 CREATE POLICY af_user_update_policy
 ON public.af_user
 FOR UPDATE
 USING (auth.jwt() ->> 'email' = email)
 WITH CHECK (auth.jwt() ->> 'email' = email);
-
+-- Policy for SELECT
 CREATE POLICY af_user_select_policy
 ON public.af_user
-AS PERMISSIVE FOR SELECT
+FOR SELECT
 TO anon, authenticated
 USING (true);
 
 ALTER TABLE af_user FORCE ROW LEVEL SECURITY;
---
+
+-- Enable RLS on the af_workspace_member table
+ALTER TABLE af_workspace_member ENABLE ROW LEVEL SECURITY;
+CREATE POLICY af_workspace_member_policy
+ON af_workspace_member
+FOR ALL
+TO anon, authenticated
+USING (true);
+ALTER TABLE af_workspace_member FORCE ROW LEVEL SECURITY;
+
+-- Enable RLS on the af_workspace table
+ALTER TABLE af_workspace ENABLE ROW LEVEL SECURITY;
+CREATE POLICY af_workspace_policy
+ON af_workspace
+FOR ALL
+TO anon, authenticated
+USING (true);
+ALTER TABLE af_workspace FORCE ROW LEVEL SECURITY;
+
+-- Update the flush_collab_updates function that accept a new column called did
 CREATE OR REPLACE FUNCTION public.flush_collab_updates_v2(
       oid TEXT,
       new_value BYTEA,
