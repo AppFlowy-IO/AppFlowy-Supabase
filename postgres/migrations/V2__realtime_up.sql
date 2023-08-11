@@ -2,6 +2,21 @@ CREATE ROLE anon;
 CREATE ROLE authenticated;
 CREATE SCHEMA IF NOT EXISTS auth;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgjwt;
+
+CREATE OR REPLACE FUNCTION auth.jwt()
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+AS $function$
+    SELECT
+        coalesce(
+            nullif(current_setting('request.jwt.claim', true), ''),
+            nullif(current_setting('request.jwt.claims', true), '')
+        )::jsonb
+$function$;
+
 -- Add the did(device_id) column to the af_collab_update table
 ALTER TABLE af_collab_update ADD COLUMN did TEXT DEFAULT '';
 -- Enable RLS on the af_collab_update table
