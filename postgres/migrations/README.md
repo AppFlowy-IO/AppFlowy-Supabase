@@ -7,3 +7,4 @@
   - eg. `V1__add_table1.down.sql`
   - Note the change in `_` to `.`
 - This is done to be compatible with `https://crates.io/crates/refinery`
+
