@@ -9,5 +9,6 @@ DROP FUNCTION IF EXISTS flush_collab_updates_v2;
 -- cannot drop schema for Supabase
 -- DROP SCHEMA IF EXISTS auth;
 
-DROP ROLE IF EXISTS authenticated;
-DROP ROLE IF EXISTS anon;
+-- cannot drop roles for Supabase
+-- DROP ROLE IF EXISTS authenticated;
+-- DROP ROLE IF EXISTS anon;
