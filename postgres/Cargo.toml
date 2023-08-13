@@ -18,6 +18,8 @@ uuid = {version="1.4.1", features = ["v4","fast-rng"]}
 md5 = "0.7.0"
 clap = "4.3.19"
 rand = "0.8.5"
+dialoguer = "0.10.4"
+
 
 [dev-dependencies]
 criterion = { version="0.5.1", features = ["async_futures"] }

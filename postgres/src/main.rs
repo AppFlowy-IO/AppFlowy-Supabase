@@ -4,6 +4,8 @@ pub mod sql_ops;
 
 use crate::migration::{get_client, run_all_up_migrations, run_down_migration};
 use clap::{Arg, ArgAction, Command};
+use dialoguer::theme::ColorfulTheme;
+use dialoguer::Select;
 use entities::PostgresConfiguration;
 use tokio_postgres::{Client, NoTls};
 
@@ -54,10 +56,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .try_get_one::<String>("env")
                 .expect("Missing migration env")
                 .unwrap();
-              println!("Reset databases from env: {:?}", env_file_name);
-              let mut client = get_client(env_file_name).await?;
-              run_down_migration(&client).await?;
-              run_all_up_migrations(&mut client).await?;
+
+              let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Are you sure to reset the database?")
+                .default(0)
+                .items(&["No", "Yes"])
+                .interact()
+                .unwrap();
+              match selection {
+                0 => {
+                  println!("Cancel");
+                },
+                1 => {
+                  if env_file_name == ".env.prod" {
+                    println!("Can't reset the production database");
+                    return Ok(());
+                  }
+
+                  println!("Reset databases from env: {:?}", env_file_name);
+                  let mut client = get_client(env_file_name).await?;
+                  run_down_migration(&client).await?;
+                  run_all_up_migrations(&mut client).await?;
+                },
+                _ => unreachable!(), // default case; shouldn't happen
+              }
             },
             _ => (),
           }
