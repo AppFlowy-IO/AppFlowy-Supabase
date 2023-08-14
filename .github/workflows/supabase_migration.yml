@@ -37,7 +37,7 @@ jobs:
 
       - name: Run all up migrations
         run: |
-          cargo run database reset .env.dev
+          cargo run database reset .env.dev no-verify
 
       - name: Run migration tests
         working-directory: ./postgres/migrations_tests
