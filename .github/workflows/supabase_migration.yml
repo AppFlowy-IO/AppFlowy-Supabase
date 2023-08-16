@@ -24,10 +24,10 @@ jobs:
       - name: Create .env file
         run: |
           touch .env.ci
-          echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env.dev
-          echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env.dev
-          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env.dev
-          echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env.dev
+          echo SUPABASE_DB=${{ secrets.SUPABASE_DB }} >> .env.ci
+          echo SUPABASE_DB_USER=${{ secrets.SUPABASE_DB_USER }} >> .env.ci
+          echo SUPABASE_DB_PORT=${{ secrets.SUPABASE_DB_PORT }} >> .env.ci
+          echo SUPABASE_DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} >> .env.ci
 
       - uses: Swatinem/rust-cache@v2
         with:
