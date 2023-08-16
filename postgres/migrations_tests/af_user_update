@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+source ./utils.sh
+
+echo -e "${BLUE}Test af_user name update${NC}"
+
+# set params
+UUID=$(uuidgen)
+NEW_NAME="updated_name_$(date +%N)"
+echo -e "${YELLOW}UUID: $UUID, NEW_NAME: $NEW_NAME${NC}"
+
+# Update the name column for the user with the specified UUID
+$PSQL --command "\
+    UPDATE public.af_user \
+    SET name = '$NEW_NAME' \
+    WHERE uuid = '$UUID';"
+echo -e "${GREEN}af_user name updated${NC}"
+
+# Fetch the updated name from the af_user table
+FETCHED_NAME=$(trim $($PSQL --tuples-only --command "\
+    SELECT name \
+    FROM public.af_user \
+    WHERE uuid = '$UUID'"))
+echo -e "${GREEN}Fetched name: $FETCHED_NAME${NC}"
+
+# Test if the updated name matches the fetched name
+if [ "$FETCHED_NAME" != "$NEW_NAME" ]; then
+    echo -e "${RED}Updated name does not match fetched name!${NC}"
+    exit 1
+else
+    echo -e "${GREEN}Updated name matches fetched name.${NC}"
+fi
