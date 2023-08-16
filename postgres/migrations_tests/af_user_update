@@ -10,6 +10,11 @@ UUID=$(uuidgen)
 NEW_NAME="updated_name_$(date +%N)"
 echo -e "${YELLOW}UUID: $UUID, NEW_NAME: $NEW_NAME${NC}"
 
+$PSQL --command "\
+    INSERT INTO public.af_user (uuid, name) \
+    VALUES ('$UUID', '$NAME');"
+echo -e "${GREEN}af_user inserted${NC}"
+
 # Update the name column for the user with the specified UUID
 $PSQL --command "\
     UPDATE public.af_user \
