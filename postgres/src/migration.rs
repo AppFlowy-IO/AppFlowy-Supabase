@@ -37,6 +37,9 @@ pub async fn run_down_migration(client: &Client) -> Result<(), Error> {
   let sql = include_str!("../migrations/V2__realtime.down.sql");
   client.batch_execute(sql).await?;
 
+  let sql = include_str!("../migrations/V3__awareness.down.sql");
+  client.batch_execute(sql).await?;
+
   client
     .batch_execute("DROP TABLE IF EXISTS af_migration_history")
     .await?;

@@ -4,6 +4,8 @@ pub mod sql_ops;
 
 use crate::migration::{get_client, run_all_up_migrations, run_down_migration};
 use clap::{Arg, ArgAction, Command};
+use dialoguer::theme::ColorfulTheme;
+use dialoguer::Select;
 use entities::PostgresConfiguration;
 use tokio_postgres::{Client, NoTls};
 
@@ -20,12 +22,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .about("Tool for manager supabase")
     .subcommand(
       Command::new("database").subcommand(
-        Command::new("reset").about("Reset the database").arg(
-          Arg::new("env")
-            .action(ArgAction::Set)
-            .value_name("ENV File Name")
-            .required(true),
-        ),
+        Command::new("reset")
+          .about("Reset the database")
+          .arg(
+            Arg::new("env")
+              .action(ArgAction::Set)
+              .value_name("ENV File Name")
+              .required(true),
+          )
+          .arg(Arg::new("no-verify").action(ArgAction::Set).required(false)),
       ),
     )
     .subcommand(
@@ -54,10 +59,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .try_get_one::<String>("env")
                 .expect("Missing migration env")
                 .unwrap();
-              println!("Reset databases from env: {:?}", env_file_name);
-              let mut client = get_client(env_file_name).await?;
-              run_down_migration(&client).await?;
-              run_all_up_migrations(&mut client).await?;
+
+              if env_file_name.ends_with(".prod") {
+                println!("Can't reset the production database");
+                return Ok(());
+              }
+
+              let reset_fn = || async {
+                println!("Reset databases from env: {:?}", env_file_name);
+                let mut client = get_client(env_file_name).await?;
+                run_down_migration(&client).await?;
+                run_all_up_migrations(&mut client).await?;
+                Ok::<(), anyhow::Error>(())
+              };
+
+              let is_no_verify = migration_matches
+                .try_contains_id("no-verify")
+                .unwrap_or(false);
+              if is_no_verify {
+                reset_fn().await?;
+              } else {
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                  .with_prompt("Are you sure to reset the database?")
+                  .default(0)
+                  .items(&["No", "Yes"])
+                  .interact()
+                  .unwrap();
+                match selection {
+                  0 => println!("Cancel"),
+                  1 => {
+                    reset_fn().await?;
+                  },
+                  _ => unreachable!(), // default case; shouldn't happen
+                }
+              }
             },
             _ => (),
           }
