@@ -5,7 +5,6 @@ real-time functionality, and storage.
 
 ## [Postgres](https://supabase.com/docs/guides/database/overview)
 
-## [Real-time](https://supabase.com/docs/guides/realtime)
 
 ## [Storage](https://supabase.com/docs/guides/storage)
 
