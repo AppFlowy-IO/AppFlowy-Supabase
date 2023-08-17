@@ -37,7 +37,7 @@ pub async fn run_down_migration(client: &Client) -> Result<(), Error> {
   let sql = include_str!("../migrations/V2__realtime.down.sql");
   client.batch_execute(sql).await?;
 
-  let sql = include_str!("../migrations/V3__awareness.down.sql");
+  let sql = include_str!("../migrations/V4__encryption.down.sql");
   client.batch_execute(sql).await?;
 
   client
