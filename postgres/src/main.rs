@@ -80,7 +80,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 reset_fn().await?;
               } else {
                 let selection = Select::with_theme(&ColorfulTheme::default())
-                  .with_prompt("Are you sure to reset the database?")
+                  .with_prompt(format!(
+                    "Are you sure to reset the database: {}?",
+                    env_file_name
+                  ))
                   .default(0)
                   .items(&["No", "Yes"])
                   .interact()
