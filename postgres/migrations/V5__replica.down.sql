@@ -1,0 +1,1 @@
+ALTER TABLE af_workspace_member DROP CONSTRAINT af_workspace_member_pkey;
