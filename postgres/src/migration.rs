@@ -40,6 +40,9 @@ pub async fn run_down_migration(client: &Client) -> Result<(), Error> {
   let sql = include_str!("../migrations/V4__encryption.down.sql");
   client.batch_execute(sql).await?;
 
+  let sql = include_str!("../migrations/V5__replica.down.sql");
+  client.batch_execute(sql).await?;
+
   client
     .batch_execute("DROP TABLE IF EXISTS af_migration_history")
     .await?;
