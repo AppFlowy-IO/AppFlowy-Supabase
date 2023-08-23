@@ -86,31 +86,23 @@ entity "af_collab_update_folder" as af_collab_update_folder {
   Inherits af_collab_update (partition_key = 3)
 }
 
+entity "af_database_row_update" as af_database_row_update {
+  Inherits af_collab_update (partition_key = 4)
+}
+
 af_collab_update_document -u-|> collab_update
 af_collab_update_database -u-|> collab_update
 af_collab_update_w_database -u-|> collab_update
 af_collab_update_folder -u-|> collab_update
+af_database_row_update -u-|> collab_update
 
-entity "af_database_row_update" as database_row_update {
-  oid : TEXT
-  key : BIGSERIAL
-  value : BYTEA
-  value_size : INTEGER
-  partition_key : INTEGER
-  uid : BIGINT
-  md5 : TEXT
-  workspace_id : UUID (FK af_workspace.workspace_id)
-  --
-  (oid, key) : PK
-}
-
-entity "af_collab_member" as collab_member {
-  uid : BIGINT (FK af_user.uid)
-  oid : TEXT (FK af_collab.oid)
-  role_id : INTEGER (FK af_roles.id)
-  --
-  (uid, oid) : PK
-}
+'entity "af_collab_member" as collab_member {
+'  uid : BIGINT (FK af_user.uid)
+'  oid : TEXT (FK af_collab.oid)
+'  role_id : INTEGER (FK af_roles.id)
+'  --
+'  (uid, oid) : PK
+'}
 
 entity "af_collab_statistics" as collab_statistics {
   oid : TEXT (PK)
@@ -132,16 +124,16 @@ roles <-- role_permissions : FK
 permissions <-u- role_permissions : FK
 user <-- collab : FK
 user <-- workspace : FK
-user <-- collab_member : FK
+'user <-- collab_member : FK
 roles <-- workspace_member : FK
 workspace <-- workspace_member : FK
 workspace <-- collab : FK
 workspace <-- database_row_update : FK
 collab <-- collab_update : FK
 collab <-- collab_snapshot: FK
-collab <-u- collab_member : FK
+'collab <-u- collab_member : FK
 collab <-- collab_statistics : PK
-roles <-- collab_member : FK
+'roles <-- collab_member : FK
 
 
 @enduml
