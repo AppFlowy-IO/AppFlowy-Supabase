@@ -29,15 +29,29 @@ SUPABASE_DB_PASSWORD=xxxxxxx
 
 ### Executing Migrations
 
-Before initiating the migrations, ensure the pertinent `.env` file is set for the specific environment.
+
+#### Step 1: Clone the Repository
 
 ```shell
-cargo run migration run ".env.dev"
+git clone https://github.com/AppFlowy-IO/AppFlowy-Supabase
 ```
+
+#### Step 2: Create the Environment File
+
+Create the `.env` file in the root directory of the repository. Makesure  to set the environment variables as described in the [Supabase Configuration](#supabase-configuration) section.
+
+![env.png](env.png)
+
+#### Step 3: Run the migrations
+
+```shell
+cargo run migration run ".env"
+```
+
 To reset the database, which entails deleting all existing tables, triggers, and functions, and then re-running the migrations:
 
 ```shell
-cargo run database reset ".env.dev"
+cargo run database reset ".env"
 ```
 
 > **Note**: For safety, the `.env.prod` file is designed to disallow the database reset command. This acts as a safeguard against unintentional deletion of the production database.
